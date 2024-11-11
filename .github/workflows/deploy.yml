@@ -1,4 +1,4 @@
-name: Deploy to AWS CodeDeploy
+name: Deploy to AWS CodeDeploy 
 
 on:
   push:
