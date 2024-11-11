@@ -16,26 +16,32 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
-          java-version: '17'  # Usa Java 17
-          distribution: 'temurin'  # Cambia a 'temurin' para evitar problemas de compatibilidad
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Build with Maven
         run: mvn clean package -DskipTests  # Compila el proyecto y genera el archivo .jar en 'target'
+
+      - name: Package JAR into ZIP
+        run: |
+          cd target
+          zip EduPlayReward-V1.0.zip EduPlayReward-V1.0.jar  # Empaqueta el .jar en un archivo .zip
+          cd ..
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  # Asegúrate de que esta sea la región correcta
+          aws-region: us-east-1
 
-      - name: Upload JAR to S3
+      - name: Upload ZIP to S3
         run: |
-          aws s3 cp target/EduPlayReward-V1.0.jar s3://mybackendbucket/EduPlayReward-V1.0.jar  # Sube el .jar a tu bucket de S3
+          aws s3 cp target/EduPlayReward-V1.0.zip s3://mybackendbucket/EduPlayReward-V1.0.zip  # Sube el .zip a tu bucket de S3
 
       - name: Deploy to AWS CodeDeploy
         run: |
           aws deploy create-deployment \
             --application-name SpringBootAppEduPlay \
             --deployment-group-name SpringBootDeploymentGroup \
-            --s3-location bucket=mybackendbucket,key=EduPlayReward-V1.0.jar,bundleType=jar
+            --s3-location bucket=mybackendbucket,key=EduPlayReward-V1.0.zip,bundleType=zip
