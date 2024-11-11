@@ -25,4 +25,4 @@ jobs:
           aws deploy create-deployment \
             --application-name SpringBootAppEduPlay \
             --deployment-group-name SpringBootDeploymentGroup \
-            --github-location repository=owner/repo,commitId=${{ github.sha }}
+            --github-location repository=TaraPadilla/EduPlay-Rewards,commitId=${{ github.sha }}
