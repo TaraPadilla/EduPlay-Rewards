@@ -1,4 +1,4 @@
-name: Deploy to AWS CodeDeploy
+name: Build and Deploy to AWS CodeDeploy
 
 on:
   push:
@@ -6,12 +6,22 @@ on:
       - master
 
 jobs:
-  deploy:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'  # Usa Java 17 como indicaste
+
+      - name: Build with Maven
+        run: |
+          mvn clean package -DskipTests
+          mv target/*.jar target/EduPlayReward-V1.0.jar  # Asegura el nombre del archivo .jar
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -20,9 +30,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1  # Asegúrate de que esta sea la región correcta
 
+      - name: Upload JAR to S3
+        run: |
+          aws s3 cp target/EduPlayReward-V1.0.jar s3://mybackendbucket/EduPlayReward-V1.0.jar  # Sube el .jar a tu bucket de S3
+
       - name: Deploy to AWS CodeDeploy
         run: |
           aws deploy create-deployment \
             --application-name SpringBootAppEduPlay \
             --deployment-group-name SpringBootDeploymentGroup \
-            --github-location repository=TaraPadilla/EduPlay-Rewards,commitId=${{ github.sha }}
+            --s3-location bucket=mybackendbucket,key=EduPlayReward-V1.0.jar,bundleType=jar
