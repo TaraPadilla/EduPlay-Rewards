@@ -16,7 +16,9 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
-          java-version: '17'  # Usa Java 17 como indicaste
+          java-version: '17'  # Usa Java 17
+          distribution: 'corretto'  # Especifica Corretto como la distribución de Java
+
 
       - name: Build with Maven
         run: |
