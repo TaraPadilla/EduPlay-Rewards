@@ -13,10 +13,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Deploy to AWS CodeDeploy
-        uses: aws-actions/aws-codedeploy-github-action@v0.3.1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          application-name: "SpringBootAppEduPlay"  # Reemplaza con el nombre de tu aplicación en CodeDeploy
-          deployment-group: "SpringBootDeploymentGroup"  # Reemplaza con el nombre de tu grupo de despliegue
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          region: "us-east-1"  # Asegúrate de que sea la misma región de tu instancia
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  # Asegúrate de que esta sea la región correcta
+
+      - name: Deploy to AWS CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name SpringBootAppEduPlay \
+            --deployment-group-name SpringBootDeploymentGroup \
+            --github-location repository=owner/repo,commitId=${{ github.sha }}
