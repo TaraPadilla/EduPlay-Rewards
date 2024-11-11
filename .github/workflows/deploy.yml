@@ -17,14 +17,10 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'  # Usa Java 17
-          distribution: 'temurin'  # Cambia a 'temurin' para evitar el problema de compatibilidad
-
-
+          distribution: 'temurin'  # Cambia a 'temurin' para evitar problemas de compatibilidad
 
       - name: Build with Maven
-        run: |
-          mvn clean package -DskipTests
-          mv target/*.jar target/EduPlayReward-V1.0.jar  # Asegura el nombre del archivo .jar
+        run: mvn clean package -DskipTests  # Compila el proyecto y genera el archivo .jar en 'target'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
