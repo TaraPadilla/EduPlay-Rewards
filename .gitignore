@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+Docs/mi-clave-ec2.pem
+Docs/eduplayreward.service
+Docs/EduPlay-Rewards.postman_collection.json
