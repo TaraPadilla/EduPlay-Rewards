@@ -17,7 +17,8 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'  # Usa Java 17
-          distribution: 'corretto'  # Especifica Corretto como la distribución de Java
+          distribution: 'temurin'  # Cambia a 'temurin' para evitar el problema de compatibilidad
+
 
 
       - name: Build with Maven
