@@ -22,10 +22,13 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests  # Compila el proyecto y genera el archivo .jar en 'target'
 
-      - name: Package JAR into ZIP
+      - name: Prepare deployment package
         run: |
-          cd target
-          zip EduPlayReward-V1.0.zip EduPlayReward-V1.0.jar  # Empaqueta el .jar en un archivo .zip
+          mkdir -p deployment_package
+          cp target/EduPlayReward-V1.0.jar deployment_package/  # Copia el .jar al paquete de despliegue
+          cp appspec.yml deployment_package/  # Copia el archivo appspec.yml
+          cd deployment_package
+          zip -r ../EduPlayReward-V1.0.zip .  # Empaqueta todo en un ZIP en el nivel superior
           cd ..
 
       - name: Configure AWS credentials
@@ -37,7 +40,7 @@ jobs:
 
       - name: Upload ZIP to S3
         run: |
-          aws s3 cp target/EduPlayReward-V1.0.zip s3://mybackendbucket/EduPlayReward-V1.0.zip  # Sube el .zip a tu bucket de S3
+          aws s3 cp EduPlayReward-V1.0.zip s3://mybackendbucket/EduPlayReward-V1.0.zip  # Sube el .zip a tu bucket de S3
 
       - name: Deploy to AWS CodeDeploy
         run: |

@@ -1,0 +1,13 @@
+version: 0.0
+os: linux
+files:
+  - source: EduPlayReward-V1.0.jar
+    destination: /home/ec2-user/app
+
+hooks:
+  AfterInstall:
+    - run: |
+        sudo systemctl daemon-reload  # Recarga systemd para detectar cambios en el servicio
+        sudo systemctl restart EduPlayReward  # Reinicia el servicio para cargar el nuevo JAR
+      timeout: 60
+      runas: ec2-user
