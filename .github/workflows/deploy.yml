@@ -1,4 +1,4 @@
-name: Build and Deploy to AWS CodeDeploy
+name: Build and Deploy to EC2 Directly
 
 on:
   push:
@@ -22,29 +22,18 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests  # Compila el proyecto y genera el archivo .jar en 'target'
 
-      - name: Prepare deployment package
+      - name: Upload JAR to EC2
+        env:
+          EC2_USER: ec2-user
+          EC2_HOST: 18.211.117.79  # Aquí coloca la IP de tu instancia EC2
+          EC2_KEY: ${{ secrets.EC2_KEY }}  # Llave privada SSH, almacénala en los secretos de GitHub
         run: |
-          mkdir -p deployment_package
-          cp target/EduPlayReward-V1.0.jar deployment_package/  # Copia el .jar al paquete de despliegue
-          cp appspec.yml deployment_package/  # Copia el archivo appspec.yml
-          cd deployment_package
-          zip -r ../EduPlayReward-V1.0.zip .  # Empaqueta todo en un ZIP en el nivel superior
-          cd ..
+          scp -i "$EC2_KEY" target/EduPlayReward-V1.0.jar $EC2_USER@$EC2_HOST:/home/ec2-user/app/
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Upload ZIP to S3
+      - name: Restart Service on EC2
+        env:
+          EC2_USER: ec2-user
+          EC2_HOST: 18.211.117.79  # Aquí también coloca la IP de tu instancia EC2
+          EC2_KEY: ${{ secrets.EC2_KEY }}
         run: |
-          aws s3 cp EduPlayReward-V1.0.zip s3://mybackendbucket/EduPlayReward-V1.0.zip  # Sube el .zip a tu bucket de S3
-
-      - name: Deploy to AWS CodeDeploy
-        run: |
-          aws deploy create-deployment \
-            --application-name SpringBootAppEduPlay \
-            --deployment-group-name SpringBootDeploymentGroup \
-            --s3-location bucket=mybackendbucket,key=EduPlayReward-V1.0.zip,bundleType=zip
+          ssh -i "$EC2_KEY" $EC2_USER@$EC2_HOST "sudo systemctl restart EduPlayReward"
